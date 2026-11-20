@@ -2380,7 +2380,7 @@ mod tests {
     use super::*;
     use crate::{open_file, DicomAttribute as _};
     use byteordered::Endianness;
-    use dicom_core::chrono::FixedOffset;
+    use dicom_core::calendar::FixedOffset;
     use dicom_core::value::{DicomDate, DicomDateTime, DicomTime};
     use dicom_core::{dicom_value, header::DataElementHeader};
     use dicom_encoding::{

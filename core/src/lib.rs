@@ -25,6 +25,7 @@
 //!   and the possible presence of sequences.
 //!
 
+pub mod calendar;
 pub mod dictionary;
 pub mod header;
 pub mod ops;
@@ -36,7 +37,6 @@ pub use header::{DataElement, DataElementHeader, Length, Tag, VR};
 pub use value::{PrimitiveValue, Value as DicomValue};
 
 // re-export crates that are part of the public API
-pub use chrono;
 pub use smallvec;
 
 /// Helper macro for constructing a DICOM primitive value,

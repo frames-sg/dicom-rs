@@ -147,7 +147,7 @@ pub trait StatefulDecode {
     /// maleable type is attempted. Namely, numbers in text form (IS, DS) are
     /// converted to the corresponding binary number types, and date/time
     /// instances are decoded into binary date/time objects of types defined in
-    /// the `chrono` crate. To avoid this conversion, see
+    /// the calendar types in `dicom-core`. To avoid this conversion, see
     /// `read_value_preserved`.
     ///
     /// # Errors
