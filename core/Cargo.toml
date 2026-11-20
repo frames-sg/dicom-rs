@@ -11,7 +11,7 @@ keywords = ["dicom"]
 readme = "README.md"
 
 [dependencies]
-chrono = { version = "0.4.31", default-features = false, features = ["std", "clock"] }
+jiff = "0.2.46"
 either = "1.13.0"
 itertools = "0.14"
 num-traits = "0.2.12"

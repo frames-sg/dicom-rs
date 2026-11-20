@@ -44,7 +44,7 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use chrono::FixedOffset;
+    use crate::calendar::FixedOffset;
     use std::str::from_utf8;
 
     #[test]

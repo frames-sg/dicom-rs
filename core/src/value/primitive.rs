@@ -181,8 +181,8 @@ impl std::error::Error for ConvertValueError {
 
 pub type Result<T, E = InvalidValueReadError> = std::result::Result<T, E>;
 
-// Re-exported from chrono
-pub use chrono::{NaiveDate, NaiveTime};
+// Re-exported from a calendar value
+pub use crate::calendar::{NaiveDate, NaiveTime};
 
 /// An aggregation of one or more elements in a value.
 pub type C<T> = SmallVec<[T; 2]>;
@@ -1948,7 +1948,7 @@ impl PrimitiveValue {
         }
     }
 
-    /// Retrieve a single `chrono::NaiveDate` from this value.
+    /// Retrieve a single `crate::calendar::NaiveDate` from this value.
     ///
     /// Please note, that this is a shortcut to obtain a usable date from a primitive value.
     /// As per standard, the stored value might not be precise. It is highly recommended to
@@ -1973,7 +1973,7 @@ impl PrimitiveValue {
     /// ```
     /// # use dicom_core::value::{C, PrimitiveValue, DicomDate};
     /// # use smallvec::smallvec;
-    /// # use chrono::NaiveDate;
+    /// # use dicom_core::calendar::NaiveDate;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// assert_eq!(
@@ -1981,7 +1981,7 @@ impl PrimitiveValue {
     ///         DicomDate::from_ymd(2014, 10, 12)?,
     ///     ])
     ///     .to_naive_date().ok(),
-    ///     Some(NaiveDate::from_ymd(2014, 10, 12)),
+    ///     Some(NaiveDate::from_ymd_opt(2014, 10, 12).unwrap()),
     /// );
     ///
     /// assert_eq!(
@@ -1989,7 +1989,7 @@ impl PrimitiveValue {
     ///         "20141012".to_string(),
     ///     ])
     ///     .to_naive_date().ok(),
-    ///     Some(NaiveDate::from_ymd(2014, 10, 12)),
+    ///     Some(NaiveDate::from_ymd_opt(2014, 10, 12).unwrap()),
     /// );
     ///
     /// assert!(
@@ -2040,7 +2040,7 @@ impl PrimitiveValue {
         }
     }
 
-    /// Retrieve the full sequence of `chrono::NaiveDate`s from this value.
+    /// Retrieve the full sequence of `crate::calendar::NaiveDate`s from this value.
     ///
     /// Please note, that this is a shortcut to obtain usable dates from a primitive value.
     /// As per standard, the stored values might not be precise. It is highly recommended to
@@ -2066,14 +2066,14 @@ impl PrimitiveValue {
     /// ```
     /// # use dicom_core::value::{C, PrimitiveValue, DicomDate};
     /// # use smallvec::smallvec;
-    /// # use chrono::NaiveDate;
+    /// # use dicom_core::calendar::NaiveDate;
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///
     /// assert_eq!(
     ///     PrimitiveValue::Date(smallvec![
     ///         DicomDate::from_ymd(2014, 10, 12)?,
     ///     ]).to_multi_naive_date().ok(),
-    ///     Some(vec![NaiveDate::from_ymd(2014, 10, 12)]),
+    ///     Some(vec![NaiveDate::from_ymd_opt(2014, 10, 12).unwrap()]),
     /// );
     ///
     /// assert_eq!(
@@ -2082,8 +2082,8 @@ impl PrimitiveValue {
     ///         "20200828".to_string(),
     ///     ]).to_multi_naive_date().ok(),
     ///     Some(vec![
-    ///         NaiveDate::from_ymd(2014, 10, 12),
-    ///         NaiveDate::from_ymd(2020, 8, 28),
+    ///         NaiveDate::from_ymd_opt(2014, 10, 12).unwrap(),
+    ///         NaiveDate::from_ymd_opt(2020, 8, 28).unwrap(),
     ///     ]),
     /// );
     /// # Ok(())
@@ -2152,8 +2152,8 @@ impl PrimitiveValue {
     /// If the value is a sequence of U8 bytes, the bytes are
     /// first interpreted as an ASCII character string.
     ///
-    /// Unlike Rust's `chrono::NaiveDate`, `DicomDate` allows for missing date components.
-    /// DicomDate implements `AsRange` trait, so specific `chrono::NaiveDate` values can be retrieved.
+    /// Unlike Rust's `crate::calendar::NaiveDate`, `DicomDate` allows for missing date components.
+    /// DicomDate implements `AsRange` trait, so specific `crate::calendar::NaiveDate` values can be retrieved.
     /// - [`.exact()`](crate::value::range::AsRange::exact)
     /// - [`.earliest()`](crate::value::range::AsRange::earliest)
     /// - [`.latest()`](crate::value::range::AsRange::latest)
@@ -2164,7 +2164,7 @@ impl PrimitiveValue {
     /// ```
     /// # use dicom_core::value::{C, PrimitiveValue};
     /// # use smallvec::smallvec;
-    /// # use chrono::NaiveDate;
+    /// # use dicom_core::calendar::NaiveDate;
     /// # use std::error::Error;
     /// use dicom_core::value::{AsRange, DicomDate};
     /// # fn main() -> Result<(), Box<dyn Error>> {
@@ -2179,11 +2179,11 @@ impl PrimitiveValue {
     ///     );
     ///  assert_eq!(
     ///     date.earliest()?,
-    ///     NaiveDate::from_ymd(2000,2,1)
+    ///     NaiveDate::from_ymd_opt(2000,2,1).unwrap()
     ///     );
     ///  assert_eq!(
     ///     date.latest()?,
-    ///     NaiveDate::from_ymd(2000,2,29)
+    ///     NaiveDate::from_ymd_opt(2000,2,29).unwrap()
     ///     );
     ///  assert!(date.exact().is_err());
     ///
@@ -2307,7 +2307,7 @@ impl PrimitiveValue {
         }
     }
 
-    /// Retrieve a single `chrono::NaiveTime` from this value.
+    /// Retrieve a single `crate::calendar::NaiveTime` from this value.
     ///
     /// Please note, that this is a shortcut to obtain a usable time from a primitive value.
     /// As per standard, the stored value might not be precise. It is highly recommended to
@@ -2332,18 +2332,18 @@ impl PrimitiveValue {
     /// ```
     /// # use dicom_core::value::{C, PrimitiveValue, DicomTime};
     /// # use smallvec::smallvec;
-    /// # use chrono::NaiveTime;
+    /// # use dicom_core::calendar::NaiveTime;
     /// # use std::error::Error;
     /// # fn main() -> Result<(), Box<dyn Error>> {
     ///
     /// assert_eq!(
     ///     PrimitiveValue::from(DicomTime::from_hms(11, 2, 45)?).to_naive_time().ok(),
-    ///     Some(NaiveTime::from_hms(11, 2, 45)),
+    ///     Some(NaiveTime::from_hms_opt(11, 2, 45).unwrap()),
     /// );
     ///
     /// assert_eq!(
     ///     PrimitiveValue::from("110245.78").to_naive_time().ok(),
-    ///     Some(NaiveTime::from_hms_milli(11, 2, 45, 780)),
+    ///     Some(NaiveTime::from_hms_milli_opt(11, 2, 45, 780).unwrap()),
     /// );
     /// # Ok(())
     /// # }
@@ -2398,7 +2398,7 @@ impl PrimitiveValue {
         }
     }
 
-    /// Retrieve the full sequence of `chrono::NaiveTime`s from this value.
+    /// Retrieve the full sequence of `crate::calendar::NaiveTime`s from this value.
     ///
     /// Please note, that this is a shortcut to obtain a usable time from a primitive value.
     /// As per standard, the stored values might not be precise. It is highly recommended to
@@ -2425,13 +2425,13 @@ impl PrimitiveValue {
     /// ```
     /// # use dicom_core::value::{C, PrimitiveValue, DicomTime};
     /// # use smallvec::smallvec;
-    /// # use chrono::NaiveTime;
+    /// # use dicom_core::calendar::NaiveTime;
     /// # use std::error::Error;
     /// # fn main() -> Result<(), Box<dyn Error>> {
     ///
     /// assert_eq!(
     ///     PrimitiveValue::from(DicomTime::from_hms(22, 58, 2)?).to_multi_naive_time().ok(),
-    ///     Some(vec![NaiveTime::from_hms(22, 58, 2)]),
+    ///     Some(vec![NaiveTime::from_hms_opt(22, 58, 2).unwrap()]),
     /// );
     ///
     /// assert_eq!(
@@ -2440,8 +2440,8 @@ impl PrimitiveValue {
     ///         "225916.742388".to_string(),
     ///     ]).to_multi_naive_time().ok(),
     ///     Some(vec![
-    ///         NaiveTime::from_hms_micro(22, 58, 2, 100_000),
-    ///         NaiveTime::from_hms_micro(22, 59, 16, 742_388),
+    ///         NaiveTime::from_hms_micro_opt(22, 58, 2, 100_000).unwrap(),
+    ///         NaiveTime::from_hms_micro_opt(22, 59, 16, 742_388).unwrap(),
     ///     ]),
     /// );
     /// # Ok(())
@@ -2511,8 +2511,8 @@ impl PrimitiveValue {
     /// If the value is a sequence of U8 bytes, the bytes are
     /// first interpreted as an ASCII character string.
     ///
-    /// Unlike Rust's `chrono::NaiveTime`, `DicomTime` allows for missing time components.
-    /// DicomTime implements `AsRange` trait, so specific `chrono::NaiveTime` values can be retrieved.
+    /// Unlike Rust's `crate::calendar::NaiveTime`, `DicomTime` allows for missing time components.
+    /// DicomTime implements `AsRange` trait, so specific `crate::calendar::NaiveTime` values can be retrieved.
     /// - [`.exact()`](crate::value::range::AsRange::exact)
     /// - [`.earliest()`](crate::value::range::AsRange::earliest)
     /// - [`.latest()`](crate::value::range::AsRange::latest)
@@ -2522,7 +2522,7 @@ impl PrimitiveValue {
     ///
     /// ```
     /// # use dicom_core::value::{C, PrimitiveValue};
-    /// # use chrono::NaiveTime;
+    /// # use dicom_core::calendar::NaiveTime;
     /// use dicom_core::value::{AsRange, DicomTime};
     /// # use std::error::Error;
     /// # fn main() -> Result<(), Box<dyn Error>> {
@@ -2537,11 +2537,11 @@ impl PrimitiveValue {
     ///     );
     ///  assert_eq!(
     ///     time.earliest()?,
-    ///     NaiveTime::from_hms(10,0,0)
+    ///     NaiveTime::from_hms_opt(10,0,0).unwrap()
     ///     );
     ///  assert_eq!(
     ///     time.latest()?,
-    ///     NaiveTime::from_hms_micro(10,59,59,999_999)
+    ///     NaiveTime::from_hms_micro_opt(10,59,59,999_999).unwrap()
     ///     );
     ///  assert!(time.exact().is_err());
     ///
@@ -2553,7 +2553,7 @@ impl PrimitiveValue {
     ///  // second fraction defaults to zeros
     ///  assert_eq!(
     ///     second.to_time()?.to_naive_time()?,
-    ///     NaiveTime::from_hms(10,12,59)
+    ///     NaiveTime::from_hms_opt(10,12,59).unwrap()
     ///  );
     ///
     ///  let fraction6 = PrimitiveValue::Str("101259.123456".into());
@@ -2627,8 +2627,8 @@ impl PrimitiveValue {
     /// If the value is a sequence of U8 bytes, the bytes are
     /// first interpreted as an ASCII character string.
     ///
-    /// Unlike Rust's `chrono::NaiveTime`, `DicomTime` allows for missing time components.
-    /// DicomTime implements `AsRange` trait, so specific `chrono::NaiveTime` values can be retrieved.
+    /// Unlike Rust's `crate::calendar::NaiveTime`, `DicomTime` allows for missing time components.
+    /// DicomTime implements `AsRange` trait, so specific `crate::calendar::NaiveTime` values can be retrieved.
     /// - [`.exact()`](crate::value::range::AsRange::exact)
     /// - [`.earliest()`](crate::value::range::AsRange::earliest)
     /// - [`.latest()`](crate::value::range::AsRange::latest)
@@ -2712,8 +2712,8 @@ impl PrimitiveValue {
     /// If the value is a sequence of U8 bytes, the bytes are
     /// first interpreted as an ASCII character string.
     ///
-    /// Unlike Rust's `chrono::DateTime`, `DicomDateTime` allows for missing date or time components.
-    /// DicomDateTime implements `AsRange` trait, so specific `chrono::DateTime` values can be retrieved.
+    /// Unlike Rust's `crate::calendar::OffsetDateTime`, `DicomDateTime` allows for missing date or time components.
+    /// DicomDateTime implements `AsRange` trait, so specific `crate::calendar::OffsetDateTime` values can be retrieved.
     /// - [`.exact()`](crate::value::range::AsRange::exact)
     /// - [`.earliest()`](crate::value::range::AsRange::earliest)
     /// - [`.latest()`](crate::value::range::AsRange::latest)
@@ -2723,7 +2723,7 @@ impl PrimitiveValue {
     /// ```
     /// # use dicom_core::value::{C, PrimitiveValue};
     /// # use smallvec::smallvec;
-    /// # use chrono::{DateTime, FixedOffset, TimeZone, NaiveDateTime, NaiveDate, NaiveTime};
+    /// # use dicom_core::calendar::{OffsetDateTime, FixedOffset, NaiveDateTime, NaiveDate, NaiveTime};
     /// # use std::error::Error;
     /// use dicom_core::value::{DicomDateTime, AsRange, DateTimeRange, PreciseDateTime};
     ///
@@ -2758,8 +2758,7 @@ impl PrimitiveValue {
     ///     dt_value.exact()?,
     ///     PreciseDateTime::TimeZone(
     ///     default_offset
-    ///     .ymd_opt(2012, 12, 21).unwrap()
-    ///     .and_hms_micro_opt(9, 30, 1, 123_456).unwrap()
+    ///     .at(NaiveDateTime::new(NaiveDate::from_ymd_opt(2012, 12, 21).unwrap(), NaiveTime::from_hms_micro_opt(9, 30, 1, 123_456).unwrap()))
     ///     )
     ///        
     /// );
@@ -2769,11 +2768,9 @@ impl PrimitiveValue {
     ///     dt_value.range()?,
     ///     DateTimeRange::from_start_to_end_with_time_zone(
     ///         FixedOffset::east_opt(3600).unwrap()
-    ///             .ymd_opt(2012, 12, 21).unwrap()
-    ///             .and_hms_micro_opt(9, 30, 1, 123_456).unwrap(),
+    ///             .at(NaiveDateTime::new(NaiveDate::from_ymd_opt(2012, 12, 21).unwrap(), NaiveTime::from_hms_micro_opt(9, 30, 1, 123_456).unwrap())),
     ///         FixedOffset::east_opt(3600).unwrap()
-    ///             .ymd_opt(2012, 12, 21).unwrap()
-    ///             .and_hms_micro_opt(9, 30, 1, 123_456).unwrap()
+    ///             .at(NaiveDateTime::new(NaiveDate::from_ymd_opt(2012, 12, 21).unwrap(), NaiveTime::from_hms_micro_opt(9, 30, 1, 123_456).unwrap()))
     ///     )?
     ///     
     /// );
@@ -2879,7 +2876,7 @@ impl PrimitiveValue {
     ///
     /// ```
     /// # use dicom_core::value::{C, PrimitiveValue};
-    /// use chrono::{NaiveDate};
+    /// use dicom_core::calendar::{NaiveDate};
     /// # use std::error::Error;
     /// use dicom_core::value::{DateRange};
     ///
@@ -2889,11 +2886,11 @@ impl PrimitiveValue {
     ///
     /// assert_eq!(
     ///     da_range.start(),
-    ///     Some(&NaiveDate::from_ymd(2012, 1, 1))
+    ///     Some(&NaiveDate::from_ymd_opt(2012, 1, 1).unwrap())
     /// );
     /// assert_eq!(
     ///     da_range.end(),
-    ///     Some(&NaiveDate::from_ymd(2013, 05, 31))
+    ///     Some(&NaiveDate::from_ymd_opt(2013, 05, 31).unwrap())
     /// );
     ///
     /// let range_from = PrimitiveValue::from("2012-").to_date_range()?;
@@ -2963,7 +2960,7 @@ impl PrimitiveValue {
     ///
     /// ```
     /// # use dicom_core::value::{C, PrimitiveValue};
-    /// use chrono::{NaiveTime};
+    /// use dicom_core::calendar::{NaiveTime};
     /// # use std::error::Error;
     /// use dicom_core::value::{TimeRange};
     ///
@@ -2974,13 +2971,13 @@ impl PrimitiveValue {
     /// // null components default to zeros
     /// assert_eq!(
     ///     tm_range.start(),
-    ///     Some(&NaiveTime::from_hms(2, 0, 0))
+    ///     Some(&NaiveTime::from_hms_opt(2, 0, 0).unwrap())
     /// );
     ///
     /// // unspecified part of second fraction defaults to latest possible
     /// assert_eq!(
     ///     tm_range.end(),
-    ///     Some(&NaiveTime::from_hms_micro(15, 30, 0, 123_999))
+    ///     Some(&NaiveTime::from_hms_micro_opt(15, 30, 0, 123_999).unwrap())
     /// );
     ///
     /// let range_from = PrimitiveValue::from("01-").to_time_range()?;
@@ -3050,7 +3047,7 @@ impl PrimitiveValue {
     ///
     /// ```
     /// # use dicom_core::value::{C, PrimitiveValue};
-    /// use chrono::{DateTime, NaiveDate, NaiveTime, NaiveDateTime, FixedOffset, TimeZone, Local};
+    /// use dicom_core::calendar::{OffsetDateTime, NaiveDate, NaiveTime, NaiveDateTime, FixedOffset, local_now};
     /// # use std::error::Error;
     /// use dicom_core::value::{DateTimeRange, PreciseDateTime};
     ///
@@ -3065,8 +3062,7 @@ impl PrimitiveValue {
     /// assert_eq!(
     ///     dt_range.start(),
     ///     Some(PreciseDateTime::TimeZone(
-    ///         FixedOffset::east_opt(5*3600).unwrap().ymd_opt(1992, 1, 1).unwrap()
-    ///         .and_hms_micro_opt(15, 30, 20, 123_000).unwrap()
+    ///         FixedOffset::east_opt(5*3600).unwrap().at(NaiveDateTime::new(NaiveDate::from_ymd_opt(1992, 1, 1).unwrap(), NaiveTime::from_hms_micro_opt(15, 30, 20, 123_000).unwrap()))
     ///         )  
     ///     )
     /// );
@@ -3075,8 +3071,7 @@ impl PrimitiveValue {
     /// assert_eq!(
     ///     dt_range.end(),
     ///     Some(PreciseDateTime::TimeZone(
-    ///         FixedOffset::east_opt(3*3600).unwrap().ymd_opt(1993, 12, 31).unwrap()
-    ///         .and_hms_micro_opt(23, 59, 59, 999_999).unwrap()
+    ///         FixedOffset::east_opt(3*3600).unwrap().at(NaiveDateTime::new(NaiveDate::from_ymd_opt(1993, 12, 31).unwrap(), NaiveTime::from_hms_micro_opt(23, 59, 59, 999_999).unwrap()))
     ///         )  
     ///     )
     /// );
@@ -3095,12 +3090,10 @@ impl PrimitiveValue {
     ///   dt_range,
     ///   DateTimeRange::TimeZone{
     ///         start: Some(FixedOffset::east_opt(5*3600).unwrap()
-    ///             .ymd_opt(1992, 1, 1).unwrap()
-    ///             .and_hms_micro_opt(0, 0, 0, 0).unwrap()
+    ///             .at(NaiveDateTime::new(NaiveDate::from_ymd_opt(1992, 1, 1).unwrap(), NaiveTime::from_hms_micro_opt(0, 0, 0, 0).unwrap()))
     ///         ),
-    ///         end: Some(Local::now().offset()
-    ///             .ymd_opt(1993, 12, 31).unwrap()
-    ///             .and_hms_micro_opt(23, 59, 59, 999_999).unwrap()
+    ///         end: Some(local_now().offset()
+    ///             .at(NaiveDateTime::new(NaiveDate::from_ymd_opt(1993, 12, 31).unwrap(), NaiveTime::from_hms_micro_opt(23, 59, 59, 999_999).unwrap()))
     ///         )
     ///     }
     /// );
@@ -3166,7 +3159,7 @@ impl PrimitiveValue {
     /// # use dicom_core::value::{C, PrimitiveValue};
     /// # use std::error::Error;
     /// use dicom_core::value::range::{AmbiguousDtRangeParser, ToKnownTimeZone, IgnoreTimeZone, FailOnAmbiguousRange, DateTimeRange};
-    /// use chrono::{NaiveDate, NaiveTime, NaiveDateTime};
+    /// use dicom_core::calendar::{NaiveDate, NaiveTime, NaiveDateTime};
     /// # fn main() -> Result<(), Box<dyn Error>> {
     ///
     /// // The upper bound time-zone is missing
@@ -4389,11 +4382,11 @@ fn whitespace_or_null(c: char) -> bool {
 #[cfg(test)]
 mod tests {
     use super::{CastValueError, ConvertValueError, InvalidValueReadError};
+    use crate::calendar::{local_now, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime};
     use crate::dicom_value;
     use crate::value::partial::{DicomDate, DicomDateTime, DicomTime};
     use crate::value::range::{DateRange, DateTimeRange, TimeRange};
     use crate::value::{PrimitiveValue, ValueType};
-    use chrono::{FixedOffset, Local, NaiveDate, NaiveDateTime, NaiveTime, TimeZone};
     use smallvec::smallvec;
 
     #[test]
@@ -4862,7 +4855,7 @@ mod tests {
     fn primitive_value_to_dicom_datetime() {
         let offset = FixedOffset::east_opt(1).unwrap();
 
-        // try from chrono::DateTime<FixedOffset>
+        // try from crate::calendar::OffsetDateTime
         assert_eq!(
             PrimitiveValue::from(
                 DicomDateTime::from_date_and_time_with_time_zone(
@@ -4881,7 +4874,7 @@ mod tests {
             )
             .unwrap()
         );
-        // try from chrono::NaiveDateTime
+        // try from crate::calendar::NaiveDateTime
         assert_eq!(
             PrimitiveValue::from(
                 DicomDateTime::from_date_and_time(
@@ -5013,23 +5006,17 @@ mod tests {
                 .to_datetime_range()
                 .unwrap(),
             DateTimeRange::TimeZone {
-                start: Some(
-                    Local::now()
-                        .offset()
-                        .from_local_datetime(&NaiveDateTime::new(
-                            NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(),
-                            NaiveTime::from_hms_opt(0, 0, 0).unwrap()
-                        ))
-                        .unwrap()
-                ),
+                start: Some(local_now().offset().at(NaiveDateTime::new(
+                    NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(),
+                    NaiveTime::from_hms_opt(0, 0, 0).unwrap()
+                ))),
                 end: Some(
                     FixedOffset::east_opt(8 * 3600)
                         .unwrap()
-                        .from_local_datetime(&NaiveDateTime::new(
+                        .at(NaiveDateTime::new(
                             NaiveDate::from_ymd_opt(2030, 12, 31).unwrap(),
                             NaiveTime::from_hms_micro_opt(23, 59, 59, 999_999).unwrap()
                         ))
-                        .unwrap()
                 )
             }
         );

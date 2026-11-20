@@ -1,9 +1,9 @@
 //! Parsing of primitive values
+use crate::calendar::{FixedOffset, NaiveDate, NaiveTime};
 use crate::value::partial::{
     check_component, DateComponent, DicomDate, DicomDateTime, DicomTime,
     Error as PartialValuesError,
 };
-use chrono::{FixedOffset, NaiveDate, NaiveTime};
 use snafu::{Backtrace, OptionExt, ResultExt, Snafu};
 use std::convert::TryFrom;
 use std::ops::{Add, Mul, Sub};
@@ -56,7 +56,7 @@ pub enum Error {
 
 type Result<T, E = Error> = std::result::Result<T, E>;
 
-/// Decode a single DICOM Date (DA) into a `chrono::NaiveDate` value.
+/// Decode a single DICOM Date (DA) into a `crate::calendar::NaiveDate` value.
 /// As per standard, a full 8 byte representation (YYYYMMDD) is required,
 /// otherwise, the operation fails.
 pub fn parse_date(buf: &[u8]) -> Result<NaiveDate> {
@@ -188,7 +188,7 @@ pub fn parse_time_partial(buf: &[u8]) -> Result<(DicomTime, &[u8])> {
     }
 }
 
-/** Decode a single DICOM Time (TM) into a `chrono::NaiveTime` value.
+/** Decode a single DICOM Time (TM) into a `crate::calendar::NaiveTime` value.
 * If a time component is missing, the operation fails.
 * Presence of the second fraction component `.FFFFFF` is mandatory with at
   least one digit accuracy `.F` while missing digits default to zero.
@@ -340,7 +340,6 @@ where
 /// ```
 /// # use dicom_core::value::deserialize::parse_datetime_partial;
 /// use dicom_core::value::{DicomDate, DicomDateTime, DicomTime, PreciseDateTime};
-/// use chrono::Datelike;
 ///
 /// let input = "20240201123456.000305";
 /// let dt = parse_datetime_partial(input.as_bytes())?;
@@ -351,7 +350,7 @@ where
 ///         DicomTime::from_hms_micro(12, 34, 56, 305).unwrap(),
 ///     )?
 /// );
-/// // reinterpret as a chrono date time (with or without time zone)
+/// // reinterpret as a calendar date-time (with or without time zone)
 /// let dt: PreciseDateTime = dt.to_precise_datetime()?;
 /// // get just the date, for example
 /// let date = dt.to_naive_date();
